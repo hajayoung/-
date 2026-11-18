@@ -153,19 +153,20 @@ function html(ep, b, i, n, D) {
   @keyframes kb{from{transform:scale(1.04) translateX(0)}to{transform:scale(1.16) translateX(var(--pan))}}
   .punchin{animation:punch 520ms cubic-bezier(.2,.9,.2,1) both}
   @keyframes punch{from{transform:scale(1.3)}to{transform:none}}
-  .fade{position:absolute;left:0;right:0;top:820px;bottom:0;background:linear-gradient(to bottom,rgba(245,239,228,0),${C.bg} 70%)}
+  .fade{position:absolute;left:0;right:0;top:1100px;bottom:0;background:linear-gradient(to bottom,rgba(245,239,228,0),${C.bg} 300px)}
   .bar{position:absolute;top:110px;left:90px;right:90px;height:12px;border-radius:6px;background:rgba(31,27,22,.12);z-index:5}
   .bar i{display:block;height:100%;border-radius:6px;background:${C.accent};animation:prog ${ms}ms linear both}
   @keyframes prog{from{width:${p0}%}to{width:${p1}%}}
   .top{position:absolute;top:150px;left:90px;font-size:36px;font-weight:800;color:${C.ink};opacity:.6;z-index:5;
        ${hasImg ? 'background:rgba(245,239,228,.85);padding:6px 18px;border-radius:999px;left:76px;opacity:.9' : ''}}
   .stage{position:absolute;left:90px;right:170px;display:flex;flex-direction:column;gap:44px;z-index:4;
-       ${hasImg ? 'bottom:400px' : 'top:250px;bottom:420px;justify-content:center'};
+       ${hasImg ? 'bottom:380px;left:60px;right:150px;padding:40px 44px;border-radius:40px;background:rgba(245,239,228,.94);box-shadow:0 18px 50px rgba(31,27,22,.18)' : 'top:250px;bottom:420px;justify-content:center'};
        animation:enter 260ms cubic-bezier(.2,.9,.2,1) both}
   @keyframes enter{from{transform:translateX(90px);opacity:.2}to{transform:none;opacity:1}}
   .shake{animation:shake 420ms ease-in-out both;animation-delay:${K.end - 150}ms}
   @keyframes shake{0%,100%{transform:none}20%{transform:translateX(-18px) rotate(-1deg)}40%{transform:translateX(16px) rotate(1deg)}60%{transform:translateX(-10px)}80%{transform:translateX(6px)}}
-  .kicker{font-size:44px;font-weight:800;color:${C.mute}}
+  .kicker{font-size:40px;font-weight:800;color:${C.mute}}
+  .imgk .kicker{align-self:flex-start;background:${C.ink};color:#fff;padding:12px 26px;border-radius:999px}
   .num{width:116px;height:116px;border-radius:58px;background:${C.accent};color:#fff;font-size:68px;font-weight:900;display:flex;align-items:center;justify-content:center}
   .big{font-size:${fs}px;font-weight:900;line-height:1.26;letter-spacing:-2px;word-break:keep-all}
   .w{display:inline-block;animation:pop 420ms cubic-bezier(.2,1.4,.4,1) both;position:relative}
@@ -207,7 +208,7 @@ function html(ep, b, i, n, D) {
   </style><body>
   ${blobs}${img}
   <div class="bar"><i></i></div><div class="top">${ep.series}</div>
-  <div class="stage"><div class="inner ${b.fx === 'shake' ? 'shake' : ''}" style="display:flex;flex-direction:column;gap:40px">
+  <div class="stage ${hasImg ? 'imgk' : ''}"><div class="inner ${b.fx === 'shake' ? 'shake' : ''}" style="display:flex;flex-direction:column;gap:40px">
     ${kick}${num}${pin}<div class="big">${K.html}</div>${extra}${sub}
   </div></div></body>`;
 }

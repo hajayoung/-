@@ -15,7 +15,7 @@ module.exports = [
       { img: 'ep1_inside', fx: 'punch', big: '"잠깐, 그래서\n[어떻게 됐어요?]"', dur: 2.8 },
       { dia: 'ringOpen', big: '사람들은\n[질문한 사람]\n쪽으로 돌아요' },
       { img: 'ep1_inside', pan: 'right', big: '그때 원이\n[열려요]', dur: 2.4 },
-      { cta: true, pin: '구독 · 2편에서 계속', big: '다음 회식 때\n[써먹어 보세요]', sub: '원 밖에서 기다리는 편이에요,\n들어가는 편이에요?', dur: 3.2 },
+      { cta: true, pin: '구독 · 2편에서 계속', big: '다음에 탕비실에서\n[써먹어 보세요]', sub: '원 밖에서 기다리는 편이에요,\n들어가는 편이에요?', dur: 3.2 },
     ],
   },
   {
