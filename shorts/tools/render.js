@@ -11,7 +11,7 @@ const FPS = 30;
 const EPS = require('./episodes.js');
 const only = process.argv[2];
 
-const C = { bg: '#F5EFE4', ink: '#1F1B16', mute: '#8A8073', accent: '#E2583A', soft: '#EADFCB', card: '#FFFFFF' };
+const C = { bg: '#F5EFE4', ink: '#1F1B16', mute: '#5A5148', accent: '#E2583A', soft: '#EADFCB', card: '#FFFFFF' };
 
 const fontFace = ['Regular:400', 'SemiBold:600', 'Bold:700', 'ExtraBold:800', 'Black:900'].map(s => {
   const [n, w] = s.split(':');
@@ -114,8 +114,12 @@ function beatDur(b) {
   return Math.min(4.4, Math.max(2.2, 1.1 + txt.length * 0.075));
 }
 
+let EV = [];
 function html(ep, b, i, n, D) {
   const ms = D * 1000;
+  if (i > 0) EV.push(['whoosh', 0]);
+  if (b.fx === 'punch') EV.push(['whoosh', 0]);
+  if (b.num) EV.push(['pop', 0]);
   const hasImg = !!b.img;
   let t = 30;
   const kick = b.kicker ? `<div class="kicker rise" style="animation-delay:60ms">${esc(b.kicker)}</div>` : '';
@@ -128,14 +132,18 @@ function html(ep, b, i, n, D) {
   let extra = '';
   if (b.dia) { extra += dia(b.dia, 250); t = Math.max(t, 900); }
   if (b.chat) {
+    b.chat.forEach((m, k) => EV.push([m.think ? 'pop' : 'blip', t + k * 420]));
     extra += `<div class="chat">${b.chat.map((m, k) => `<div class="b ${m.s}${m.think ? ' think' : ''} bub" style="animation-delay:${t + k * 420}ms">${esc(m.t)}</div>`).join('')}</div>`;
     t += b.chat.length * 420;
   }
   if (b.list) {
+    b.list.forEach((x, k) => EV.push(['pop', t + k * 260]));
     extra += `<ol class="list">${b.list.map((x, k) => `<li class="slide" style="animation-delay:${t + k * 260}ms"><b>${k + 1}</b>${esc(x)}</li>`).join('')}</ol>`;
     t += b.list.length * 260;
   }
   const sub = b.sub ? `<div class="sub rise" style="animation-delay:${t + 100}ms">${esc(b.sub).replace(/\n/g, '<br>')}</div>` : '';
+  if (b.fx === 'shake') EV.push(['boing', K.end - 150]);
+  if (b.cta) EV.push(['ding', 150]);
   const pan = b.pan === 'left' ? '-40px' : b.pan === 'right' ? '40px' : '0px';
   const img = hasImg ? `<div class="imgwrap"><div class="${b.fx === 'punch' ? 'punchin' : ''}" style="width:100%;height:100%"><img class="kb" style="--pan:${pan};animation-duration:${ms}ms" src="file://${DIR}/images/${b.img}.png"></div></div><div class="fade"></div>` : '';
   const blobs = hasImg ? '' : `<div class="blob b1" style="animation-duration:${ms}ms"></div><div class="blob b2" style="animation-duration:${ms}ms"></div>`;
@@ -220,32 +228,39 @@ function html(ep, b, i, n, D) {
     if (only && ep.id !== only) continue;
     const fdir = path.join(DIR, 'frames', ep.id);
     fs.rmSync(fdir, { recursive: true, force: true }); fs.mkdirSync(fdir, { recursive: true });
-    let f = 0; const starts = [];
+    let f = 0; const starts = []; const events = [];
     for (let i = 0; i < ep.beats.length; i++) {
       const b = ep.beats[i], D = beatDur(b), N = Math.round(D * FPS);
+      const OFF = i === 0 ? 1300 : 0; // 첫 장면은 첫 프레임부터 글자가 다 보이게
       starts.push(f / FPS);
+      EV = [];
       const hf = path.join(DIR, 'frames', `_${ep.id}.html`);
       fs.writeFileSync(hf, html(ep, b, i, ep.beats.length, D));
       await page.goto('file://' + hf, { waitUntil: 'load' });
       await page.evaluate(() => document.fonts.ready);
       await page.evaluate(() => document.getAnimations().forEach(a => a.pause()));
       for (let k = 0; k < N; k++) {
-        await page.evaluate(ms => document.getAnimations().forEach(a => { a.currentTime = ms; }), k * 1000 / FPS);
+        await page.evaluate(ms => document.getAnimations().forEach(a => { a.currentTime = ms; }), k * 1000 / FPS + OFF);
         await page.screenshot({ path: path.join(fdir, `${String(f++).padStart(5, '0')}.jpg`), type: 'jpeg', quality: 90 });
       }
+      EV.forEach(([name, ms]) => { const at = starts[i] + (ms - OFF) / 1000; if (at >= starts[i] - 0.001) events.push([name, at]); });
     }
-    // 장면 전환마다 짧은 '톡' 효과음
-    const pop = path.join(DIR, 'pop.wav');
-    if (!fs.existsSync(pop)) execFileSync('ffmpeg', ['-y', '-f', 'lavfi', '-i', 'sine=frequency=880:duration=0.07', '-af', 'afade=t=out:st=0.01:d=0.06,volume=0.35', pop], { stdio: 'ignore' });
+    // 배경음악 + 효과음 믹스
     const total = f / FPS;
-    const aIn = [], aF = [];
-    starts.forEach((s, k) => { aIn.push('-i', pop); aF.push(`[${k + 1}:a]adelay=${Math.round(s * 1000)}|${Math.round(s * 1000)}[a${k}]`); });
-    const mix = `${aF.join(';')};${starts.map((_, k) => `[a${k}]`).join('')}amix=inputs=${starts.length}:normalize=0,apad,atrim=0:${total.toFixed(2)}[aout]`;
+    const VOL = { whoosh: 0.55, pop: 0.6, blip: 0.5, boing: 0.6, ding: 0.55 };
+    const aIn = ['-stream_loop', '-1', '-i', path.join(DIR, 'audio', 'bgm.wav')], aF = [];
+    aF.push(`[1:a]volume=0.35,atrim=0:${total.toFixed(2)},afade=t=in:d=0.3,afade=t=out:st=${(total - 1.5).toFixed(2)}:d=1.5[bgm]`);
+    events.forEach(([name, at], k) => {
+      aIn.push('-i', path.join(DIR, 'audio', `${name}.wav`));
+      const d = Math.max(0, Math.round(at * 1000));
+      aF.push(`[${k + 2}:a]volume=${VOL[name]},adelay=${d}|${d}[e${k}]`);
+    });
+    const mix = `${aF.join(';')};[bgm]${events.map((_, k) => `[e${k}]`).join('')}amix=inputs=${events.length + 1}:normalize=0:duration=first,loudnorm=I=-15:TP=-1.5:LRA=11,aresample=44100[aout]`;
     const out = path.join(DIR, 'out', `내향인대화법_${ep.id}.mp4`);
     execFileSync('ffmpeg', ['-y', '-framerate', String(FPS), '-i', path.join(fdir, '%05d.jpg'), ...aIn,
       '-filter_complex', mix, '-map', '0:v', '-map', '[aout]', '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-pix_fmt', 'yuv420p',
       '-c:a', 'aac', '-ar', '44100', '-ac', '2', '-movflags', '+faststart', out], { stdio: 'ignore' });
-    console.log(ep.id, total.toFixed(1) + 's', f, 'frames');
+    console.log(ep.id, total.toFixed(1) + 's', f, 'frames', events.length, 'sfx');
   }
   await browser.close();
 })();
