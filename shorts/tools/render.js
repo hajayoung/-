@@ -121,7 +121,7 @@ function html(ep, b, i, n, D) {
   const kick = b.kicker ? `<div class="kicker rise" style="animation-delay:60ms">${esc(b.kicker)}</div>` : '';
   if (b.kicker) t += 200;
   const num = b.num ? `<div class="num spin" style="animation-delay:0ms">${b.num}</div>` : '';
-  const pin = b.cta ? `<div class="pin bounce">저장 · 공유</div>` : '';
+  const pin = b.cta ? `<div class="pin bounce">${esc(b.pin || '구독 · 다음 편')}</div>` : '';
   const K = kinetic(b.big, t, 55); t = K.end;
   const lens = b.big.replace(/\[|\]/g, '').split('\n').map(l => l.length);
   const fs = Math.min(hasImg ? 92 : 104, Math.floor(900 / Math.max(...lens)));
@@ -159,7 +159,7 @@ function html(ep, b, i, n, D) {
   @keyframes prog{from{width:${p0}%}to{width:${p1}%}}
   .top{position:absolute;top:150px;left:90px;font-size:36px;font-weight:800;color:${C.ink};opacity:.6;z-index:5;
        ${hasImg ? 'background:rgba(245,239,228,.85);padding:6px 18px;border-radius:999px;left:76px;opacity:.9' : ''}}
-  .stage{position:absolute;left:90px;right:90px;display:flex;flex-direction:column;gap:44px;z-index:4;
+  .stage{position:absolute;left:90px;right:170px;display:flex;flex-direction:column;gap:44px;z-index:4;
        ${hasImg ? 'bottom:400px' : 'top:250px;bottom:420px;justify-content:center'};
        animation:enter 260ms cubic-bezier(.2,.9,.2,1) both}
   @keyframes enter{from{transform:translateX(90px);opacity:.2}to{transform:none;opacity:1}}
@@ -209,7 +209,7 @@ function html(ep, b, i, n, D) {
   <div class="bar"><i></i></div><div class="top">${ep.series}</div>
   <div class="stage"><div class="inner ${b.fx === 'shake' ? 'shake' : ''}" style="display:flex;flex-direction:column;gap:40px">
     ${kick}${num}${pin}<div class="big">${K.html}</div>${extra}${sub}
-  </div></div>${hasImg ? '' : '<div class="handle">두잉영</div>'}</body>`;
+  </div></div></body>`;
 }
 
 (async () => {
@@ -240,7 +240,7 @@ function html(ep, b, i, n, D) {
     const aIn = [], aF = [];
     starts.forEach((s, k) => { aIn.push('-i', pop); aF.push(`[${k + 1}:a]adelay=${Math.round(s * 1000)}|${Math.round(s * 1000)}[a${k}]`); });
     const mix = `${aF.join(';')};${starts.map((_, k) => `[a${k}]`).join('')}amix=inputs=${starts.length}:normalize=0,apad,atrim=0:${total.toFixed(2)}[aout]`;
-    const out = path.join(DIR, 'out', `두잉영_${ep.id}.mp4`);
+    const out = path.join(DIR, 'out', `내향인대화법_${ep.id}.mp4`);
     execFileSync('ffmpeg', ['-y', '-framerate', String(FPS), '-i', path.join(fdir, '%05d.jpg'), ...aIn,
       '-filter_complex', mix, '-map', '0:v', '-map', '[aout]', '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-pix_fmt', 'yuv420p',
       '-c:a', 'aac', '-ar', '44100', '-ac', '2', '-movflags', '+faststart', out], { stdio: 'ignore' });
