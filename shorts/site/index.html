@@ -1,0 +1,422 @@
+<title>내향인 대화법</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: one left-aligned column. Hero = a top-down conversation circle you can step into.
+   Then four episodes in series order, a pocket list of every line, and sources.
+   Orange only ever means "you" (the protagonist's sweater). Serif only ever means "words said out loud". */
+:root {
+  --paper: #F3E8D8;
+  --surface: #E9DBC5;
+  --ink: #2B2723;
+  --mute: #6B5F54;
+  --you: #D9583A;
+  --you-ink: #FFF6EE;
+  --figure: #3A342F;
+  --hair: #1F1B18;
+  --line: #CDBBA2;
+  --sans: "IBM Plex Sans KR", "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --speech: "Gowun Batang", "AppleMyungjo", "Nanum Myeongjo", "Batang", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1F1B18; --surface: #2B2622; --ink: #EFE5D6; --mute: #AC9F90;
+    --you: #EE7653; --you-ink: #1F1B18; --figure: #8A7D70; --hair: #5B524A; --line: #4A413A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1F1B18; --surface: #2B2622; --ink: #EFE5D6; --mute: #AC9F90;
+  --you: #EE7653; --you-ink: #1F1B18; --figure: #8A7D70; --hair: #5B524A; --line: #4A413A;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { margin: 0; font-weight: 700; text-wrap: balance; letter-spacing: -0.02em; }
+p { margin: 0; }
+:focus-visible { outline: 3px solid var(--you); outline-offset: 3px; border-radius: 4px; }
+
+/* ---------- masthead ---------- */
+.mast {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+  padding-block: 1.25rem;
+  font-size: 0.9375rem;
+}
+.mast strong { font-weight: 700; letter-spacing: -0.01em; }
+.mast span { color: var(--mute); }
+
+/* ---------- hero ---------- */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 2rem 3.5rem;
+  align-items: center;
+  padding-block: 2.5rem 4.5rem;
+}
+.hero-text { display: grid; gap: 1.25rem; min-width: 0; }
+.hero h1 { font-size: clamp(2.1rem, 5.2vw, 3.5rem); line-height: 1.22; }
+.hero .lede { color: var(--mute); max-width: 30em; }
+.say {
+  justify-self: start;
+  display: grid; gap: 0.15rem;
+  text-align: left;
+  font: inherit;
+  color: var(--you-ink);
+  background: var(--you);
+  border: 0;
+  border-radius: 1.4rem 1.4rem 1.4rem 0.35rem;
+  padding: 0.95rem 1.4rem 1rem;
+  cursor: pointer;
+  transition: transform 160ms ease-out, box-shadow 160ms ease-out;
+  box-shadow: 0 0 0 0 var(--you);
+}
+.say:hover { transform: translateY(-2px); }
+.say:active { transform: translateY(0) scale(0.98); }
+.say .words { font-family: var(--speech); font-size: 1.3rem; font-weight: 700; line-height: 1.4; }
+.say .hint { font-size: 0.8125rem; opacity: 0.85; }
+.say[data-done] { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); border-radius: 999px; padding: 0.6rem 1.2rem; }
+.say[data-done] .words { font-family: var(--sans); font-size: 0.9375rem; font-weight: 500; }
+.say[data-done] .hint { display: none; }
+
+.stage { min-width: 0; display: grid; gap: 0.75rem; }
+.stage svg { width: 100%; max-width: 100%; height: auto; display: block; overflow: visible; }
+.caption { min-height: 3.4em; color: var(--mute); font-size: 0.9375rem; }
+.caption b { color: var(--ink); font-weight: 700; }
+
+.person { transform-box: view-box; transform-origin: 0 0; transition: transform 1100ms cubic-bezier(.5,0,.2,1); }
+.person .turn { transform-box: fill-box; transform-origin: center; transition: transform 600ms cubic-bezier(.4,0,.2,1); }
+.shoulders { fill: var(--figure); }
+.head { fill: var(--hair); }
+.me .shoulders { fill: var(--you); }
+.me .head { fill: var(--hair); }
+.ring { fill: none; stroke: var(--line); stroke-width: 2; stroke-dasharray: 3 7; stroke-linecap: round; transition: r 1100ms cubic-bezier(.5,0,.2,1); }
+.floor-label { fill: var(--mute); font-family: var(--sans); font-size: 12px; }
+.bubble { opacity: 0; transition: opacity 300ms ease; }
+.bubble.on { opacity: 1; }
+.bubble rect { fill: var(--you); }
+.bubble text { fill: var(--you-ink); font-family: var(--speech); font-weight: 700; font-size: 14px; }
+.me-label { fill: var(--you); font-family: var(--sans); font-weight: 700; font-size: 13px; }
+
+/* ---------- episodes ---------- */
+.episodes { display: grid; gap: 0; border-top: 1.5px solid var(--line); }
+.ep {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  gap: 1.5rem 3rem;
+  padding-block: 3.5rem;
+  border-bottom: 1.5px solid var(--line);
+}
+.ep video {
+  width: 100%; max-width: 100%;
+  aspect-ratio: 9 / 16;
+  object-fit: cover;
+  border-radius: 1.1rem;
+  background: var(--surface);
+  display: block;
+}
+.ep-body { min-width: 0; display: grid; gap: 1.1rem; align-content: start; max-width: 38rem; }
+.ep-no { font-size: 0.9375rem; font-weight: 700; color: var(--mute); }
+.ep-no span { font-weight: 400; }
+.ep h2 { font-size: clamp(1.6rem, 3.4vw, 2.2rem); line-height: 1.3; }
+.ep .why { color: var(--ink); }
+.ep .why + .why { margin-top: -0.4rem; }
+.lines { list-style: none; margin: 0.4rem 0 0; padding: 0; display: grid; gap: 0.6rem; justify-items: start; }
+.line {
+  font-family: var(--speech); font-weight: 700;
+  font-size: clamp(1.2rem, 2.4vw, 1.45rem); line-height: 1.45;
+  color: var(--ink);
+  background: var(--surface);
+  border-left: 4px solid var(--you);
+  border-radius: 0.3rem 1.2rem 1.2rem 0.3rem;
+  padding: 0.7rem 1.2rem 0.75rem;
+}
+.line small { display: block; font-family: var(--sans); font-weight: 400; font-size: 0.875rem; color: var(--mute); margin-top: 0.15rem; }
+.cite { font-size: 0.8125rem; color: var(--mute); }
+
+/* ---------- pocket ---------- */
+.pocket { padding-block: 4.5rem 3rem; display: grid; gap: 1.75rem; }
+.pocket-head { display: grid; gap: 0.5rem; max-width: 34rem; }
+.pocket h2 { font-size: clamp(1.6rem, 3.4vw, 2.2rem); line-height: 1.3; }
+.pocket-head p { color: var(--mute); }
+.pocket ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 1.5px solid var(--line); }
+.pocket li {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.25rem 1rem; align-items: center;
+  padding: 1.1rem 0; border-bottom: 1.5px solid var(--line);
+}
+.pocket li:nth-child(odd) { padding-right: 2rem; }
+.pocket li:nth-child(even) { padding-left: 2rem; border-left: 1.5px solid var(--line); }
+.pocket .when { grid-column: 1 / -1; font-size: 0.875rem; color: var(--mute); }
+.pocket q { font-family: var(--speech); font-weight: 700; font-size: 1.2rem; line-height: 1.45; quotes: "“" "”"; min-width: 0; }
+.copy {
+  font: inherit; font-size: 0.875rem; font-weight: 500;
+  color: var(--ink); background: transparent;
+  border: 1.5px solid var(--line); border-radius: 999px;
+  padding: 0.3rem 0.9rem; cursor: pointer; white-space: nowrap;
+}
+.copy:hover { border-color: var(--ink); }
+.copy[data-copied] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* ---------- sources ---------- */
+.sources { padding-block: 2rem 4rem; color: var(--mute); font-size: 0.875rem; display: grid; gap: 0.6rem; max-width: 42rem; }
+.sources h2 { font-size: 0.9375rem; color: var(--ink); letter-spacing: 0; }
+.sources ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.3rem; }
+.sources i { font-style: italic; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 860px) {
+  .hero { grid-template-columns: minmax(0, 1fr); padding-block: 1.5rem 3.5rem; }
+  .stage { order: 2; }
+  .ep { grid-template-columns: minmax(0, 1fr); padding-block: 2.75rem; }
+  .ep video { width: min(100%, 17rem); order: 2; }
+  .pocket ol { grid-template-columns: minmax(0, 1fr); }
+  .pocket li:nth-child(odd), .pocket li:nth-child(even) { padding-left: 0; padding-right: 0; border-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .person, .person .turn, .ring, .bubble, .say { transition: none !important; }
+}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <strong>내향인 대화법</strong>
+    <span>유튜브 쇼츠 4편</span>
+  </header>
+
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-text">
+      <h1 id="hero-title">대화하는 무리는 일부러 닫힌 게 아니에요</h1>
+      <p class="lede">사람은 말하는 사람 쪽으로 몸을 돌려요. 그러면 어깨끼리 붙어서 원이 저절로 닫혀요. 뒤에서 웃어주는 걸로는 안 열려요. 반 발짝 들어가서 질문 하나만 하면 돼요.</p>
+      <button class="say" id="say" type="button">
+        <span class="words">“잠깐, 그래서 어떻게 됐어요?”</span>
+        <span class="hint">눌러서 말해보기</span>
+      </button>
+    </div>
+
+    <figure class="stage" style="margin:0">
+      <svg id="circle" viewBox="0 0 400 300" role="img" aria-labelledby="circle-desc">
+        <desc id="circle-desc">위에서 내려다본 탕비실. 세 사람이 서로를 보고 둥글게 서 있고, 주황색으로 표시한 나는 원 밖에 서 있어요.</desc>
+        <circle class="ring" id="ring" cx="200" cy="175" r="44"></circle>
+        <!-- people are drawn facing local -x; JS places them -->
+        <g class="person" data-id="a"><g class="turn"><ellipse class="shoulders" cx="0" cy="0" rx="13" ry="27"></ellipse><circle class="head" cx="-1" cy="0" r="12"></circle></g></g>
+        <g class="person" data-id="b"><g class="turn"><ellipse class="shoulders" cx="0" cy="0" rx="13" ry="27"></ellipse><circle class="head" cx="-1" cy="0" r="12"></circle></g></g>
+        <g class="person" data-id="c"><g class="turn"><ellipse class="shoulders" cx="0" cy="0" rx="13" ry="27"></ellipse><circle class="head" cx="-1" cy="0" r="12"></circle></g></g>
+        <g class="person me" data-id="me"><g class="turn"><ellipse class="shoulders" cx="0" cy="0" rx="13" ry="27"></ellipse><circle class="head" cx="-1" cy="0" r="12"></circle></g></g>
+        <text class="me-label" id="me-label" x="200" y="22" text-anchor="middle">나</text>
+        <g class="bubble" id="bubble">
+          <rect x="222" y="6" width="166" height="34" rx="17"></rect>
+          <text x="305" y="28" text-anchor="middle">그래서 어떻게 됐어요?</text>
+        </g>
+        <text class="floor-label" x="200" y="292" text-anchor="middle">위에서 본 탕비실</text>
+      </svg>
+      <figcaption class="caption" id="caption" aria-live="polite">셋이 서로를 보고 서 있어요. <b>나</b>는 한 사람 어깨 뒤에서 기다리는 중이에요.</figcaption>
+    </figure>
+  </section>
+
+  <main class="episodes" aria-label="에피소드">
+    <article class="ep" id="ep1">
+      <video src="media/ep1.mp4" poster="media/ep1_outside.jpg" controls playsinline preload="none" aria-label="1편 영상"></video>
+      <div class="ep-body">
+        <p class="ep-no">1편 <span>대화에 못 끼고 서 있을 때</span></p>
+        <h2>웃어주기만 하면 그 원은 영영 안 열려요</h2>
+        <p class="why">셋이 얘기하는데 내가 다가가도 아무도 안 돌아봐요. 사람들이 말하는 사람 쪽으로 몸을 돌려서 원이 닫혀 있거든요. 틈으로 반 발짝 들어가서 말하는 사람한테 물어보세요. 사람들은 질문한 사람 쪽으로 몸을 돌려요.</p>
+        <ul class="lines">
+          <li class="line">“잠깐, 그래서 어떻게 됐어요?”</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="ep" id="ep2">
+      <video src="media/ep2.mp4" poster="media/ep2_forget.jpg" controls playsinline preload="none" aria-label="2편 영상"></video>
+      <div class="ep-body">
+        <p class="ep-no">2편 <span>자기소개만 하면 이름이 묻힐 때</span></p>
+        <h2>이름을 먼저 말해서 까먹히는 거예요</h2>
+        <p class="why">내 차례 바로 앞에 나온 말은 잘 기억하지 못해요. 할 말을 속으로 준비하느라 바쁘거든요. 심리학에서는 차례 직전 효과라고 불러요. 상대가 먼저 이름을 말하게 하면, 그다음에 말한 내 이름이 기억에 남아요.</p>
+        <ul class="lines">
+          <li class="line">“처음 뵙는 것 같아요!”<small>상대가 이름을 말하면, 그다음에 내 이름</small></li>
+        </ul>
+        <p class="cite">Brenner (1973), The next-in-line effect</p>
+      </div>
+    </article>
+
+    <article class="ep" id="ep3">
+      <video src="media/ep3.mp4" poster="media/ep3_lean.jpg" controls playsinline preload="none" aria-label="3편 영상"></video>
+      <div class="ep-body">
+        <p class="ep-no">3편 <span>회식만 가면 끝자리일 때</span></p>
+        <h2>몸을 기울일수록 더 소외돼요</h2>
+        <p class="why">대화 하나에 끼는 사람은 4명 정도가 최대예요. 그보다 많으면 대화가 둘로 갈라져요. 8명 테이블은 대화가 두 개이고, 끝자리는 먼 쪽 대화의 가장자리예요. 기울이지 말고 옆에 앉은 세 명이랑 두 번째 대화를 시작하세요.</p>
+        <ul class="lines">
+          <li class="line">“올해 제일 황당했던 일 뭐였어요?”</li>
+        </ul>
+        <p class="cite">Dunbar 외 (1995), Size and structure of freely forming conversational groups</p>
+      </div>
+    </article>
+
+    <article class="ep" id="ep4">
+      <video src="media/ep4.mp4" poster="media/ep4_silence.jpg" controls playsinline preload="none" aria-label="4편 영상"></video>
+      <div class="ep-body">
+        <p class="ep-no">4편 <span>대화가 자꾸 끊길 때</span></p>
+        <h2>“오 좋네요”가 대화를 끝내요</h2>
+        <p class="why">“주말에 등산 다녀왔어요.” “오 좋네요.” 그리고 엘리베이터 층수만 봐요. 대신 쓸 문장 네 개만 갖고 다니세요.</p>
+        <ul class="lines">
+          <li class="line">“더 얘기해 주세요.”<small>상대가 이야기를 꺼내면 판을 넘겨주기</small></li>
+          <li class="line">“가보니까 어떤 느낌이었어요?”<small>“어땠어요?”는 점수만 듣고 끝나요</small></li>
+          <li class="line">“어쩌다 시작하게 됐어요?”<small>이유를 물으면 이야기가 따라 나와요</small></li>
+          <li class="line">“요즘 마음은 어느 쪽이에요?”<small>고민 얘기에 바로 조언하는 대신</small></li>
+        </ul>
+        <p class="cite">Tamir &amp; Mitchell (2012), PNAS</p>
+      </div>
+    </article>
+  </main>
+
+  <section class="pocket" aria-labelledby="pocket-title">
+    <div class="pocket-head">
+      <h2 id="pocket-title">송년회 가기 전에 한 번 더</h2>
+      <p>일곱 문장이 전부예요. 하나만 골라서 이번 주에 써보세요.</p>
+    </div>
+    <ol>
+      <li><span class="when">대화하는 무리에 들어갈 때</span><q>잠깐, 그래서 어떻게 됐어요?</q><button class="copy" type="button">복사</button></li>
+      <li><span class="when">처음 보는 사람과 인사할 때</span><q>처음 뵙는 것 같아요!</q><button class="copy" type="button">복사</button></li>
+      <li><span class="when">긴 테이블 끝자리에서</span><q>올해 제일 황당했던 일 뭐였어요?</q><button class="copy" type="button">복사</button></li>
+      <li><span class="when">상대가 이야기를 꺼냈을 때</span><q>더 얘기해 주세요.</q><button class="copy" type="button">복사</button></li>
+      <li><span class="when">“어땠어요?” 대신</span><q>가보니까 어떤 느낌이었어요?</q><button class="copy" type="button">복사</button></li>
+      <li><span class="when">새로 시작한 일 얘기에</span><q>어쩌다 시작하게 됐어요?</q><button class="copy" type="button">복사</button></li>
+      <li><span class="when">고민 얘기에 조언하고 싶을 때</span><q>요즘 마음은 어느 쪽이에요?</q><button class="copy" type="button">복사</button></li>
+    </ol>
+  </section>
+
+  <footer class="sources">
+    <h2>근거</h2>
+    <ul>
+      <li>Brenner, M. (1973). The next-in-line effect. <i>Journal of Verbal Learning and Verbal Behavior</i>.</li>
+      <li>Dunbar, R. I. M., Duncan, N. D. C., &amp; Nettle, D. (1995). Size and structure of freely forming conversational groups. <i>Human Nature</i>.</li>
+      <li>Tamir, D. I., &amp; Mitchell, J. P. (2012). Disclosing information about the self is intrinsically rewarding. <i>PNAS</i>.</li>
+    </ul>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const C = { x: 200, y: 175 };
+  const people = Object.fromEntries([...document.querySelectorAll('.person')].map(g => [g.dataset.id, g]));
+  const ring = document.getElementById('ring');
+  const bubble = document.getElementById('bubble');
+  const meLabel = document.getElementById('me-label');
+  const caption = document.getElementById('caption');
+  const say = document.getElementById('say');
+  const words = say.querySelector('.words');
+
+  // angle (deg, 0 = right, 90 = down), radius, extra head turn
+  const CLOSED = { a: [90, 0], b: [210, 0], c: [330, 0], me: [270, 0], r: 42, meR: 122 };
+  const pos = (A, R) => [C.x + R * Math.cos(A * Math.PI / 180), C.y + R * Math.sin(A * Math.PI / 180)];
+
+  function place(id, A, R, turn) {
+    // rotate to angle, step out by radius, face centre (local -x already faces centre)
+    people[id].style.transform = `translate(200px, 175px) rotate(${A}deg) translateX(${R}px)`;
+    people[id].querySelector('.turn').style.transform = `rotate(${turn}deg)`;
+  }
+  // head turn needed for someone at (A,R) to face point t
+  function faceToward(A, R, t) {
+    const [px, py] = pos(A, R);
+    const phi = Math.atan2(t[1] - py, t[0] - px) * 180 / Math.PI;
+    let turn = phi - A - 180;
+    turn = ((turn + 540) % 360) - 180;
+    return turn;
+  }
+
+  const timers = [];
+  const later = (ms, fn) => timers.push(setTimeout(fn, ms));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function reset() {
+    timers.splice(0).forEach(clearTimeout);
+    place('a', 90, CLOSED.r, 0);
+    place('b', 210, CLOSED.r, 0);
+    place('c', 330, CLOSED.r, 0);
+    place('me', 270, CLOSED.meR, 0); // standing outside, facing the group
+    ring.setAttribute('r', CLOSED.r + 2);
+    bubble.classList.remove('on');
+    meLabel.setAttribute('y', C.y - CLOSED.meR - 34);
+    caption.innerHTML = '셋이 서로를 보고 서 있어요. <b>나</b>는 한 사람 어깨 뒤에서 기다리는 중이에요.';
+    words.textContent = '“잠깐, 그래서 어떻게 됐어요?”';
+    delete say.dataset.done;
+  }
+
+  function play() {
+    if (say.dataset.done) { reset(); say.focus(); return; }
+    say.dataset.done = '';
+    words.textContent = '처음부터 다시 보기';
+    const step = reduce ? 0 : 1;
+
+    // 1. half a step into the gap, ask
+    const halfR = 92;
+    place('me', 270, halfR, 0);
+    meLabel.setAttribute('y', C.y - halfR - 34);
+    bubble.classList.add('on');
+    caption.innerHTML = '틈으로 <b>반 발짝</b> 들어가서, 말하는 사람한테 물어봐요.';
+
+    // 2. everyone turns toward the person who asked
+    later(700 * step, () => {
+      const me = pos(270, halfR);
+      place('a', 90, CLOSED.r, faceToward(90, CLOSED.r, me));
+      place('b', 210, CLOSED.r, faceToward(210, CLOSED.r, me));
+      place('c', 330, CLOSED.r, faceToward(330, CLOSED.r, me));
+      caption.innerHTML = '사람들은 <b>질문한 사람</b> 쪽으로 몸을 돌려요.';
+    });
+
+    // 3. the circle widens and makes room
+    later(1900 * step, () => {
+      const R = 66;
+      place('a', 90, R, 0);
+      place('b', 180, R, 0);
+      place('c', 360, R, 0);
+      place('me', 270, R, 0);
+      ring.setAttribute('r', R + 2);
+      meLabel.setAttribute('y', C.y - R - 34);
+      caption.innerHTML = '그때 원이 넓어져요. 이제 <b>나</b>도 원 안에 있어요.';
+    });
+    later(2900 * step, () => bubble.classList.remove('on'));
+  }
+
+  say.addEventListener('click', play);
+  reset();
+
+  // copy buttons
+  document.querySelectorAll('.copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const q = btn.parentElement.querySelector('q');
+      const text = q.textContent.trim();
+      const done = () => {
+        btn.dataset.copied = ''; btn.textContent = '복사됨';
+        setTimeout(() => { delete btn.dataset.copied; btn.textContent = '복사'; }, 1600);
+      };
+      const fallback = () => {
+        const r = document.createRange(); r.selectNodeContents(q);
+        const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+        btn.textContent = '선택됨';
+        setTimeout(() => { btn.textContent = '복사'; }, 1600);
+      };
+      try {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } catch (e) { fallback(); }
+    });
+  });
+})();
+</script>
